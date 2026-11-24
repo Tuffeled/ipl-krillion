@@ -1,0 +1,210 @@
+:root{
+ --night:#060b1a;--navy:#0c1630;--panel:#0f1b38;--edge:#2b3a66;--ink:#f1f4ff;--muted:#8d9bc4;
+ --gold:#ffcc33;--pink:#ff5d8f;--cyan:#4de3ff;--grass:#5fd068;--miss:#ff6b5a;
+ --turf:#1d7a3c;--turf2:#23873f;--pitch:#c9a66b;
+ --ground:36dvh;--feet:max(96px,17dvh);--bat-x:max(26px,10vw);--bat-w:clamp(92px,15vw,150px);--bat-mid:calc(var(--bat-w) * .5);
+ --ease-out:cubic-bezier(.22,1,.36,1);--ease-snap:cubic-bezier(.34,1.56,.64,1);
+ --pixel:var(--font-pixel),ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--night)}
+body{color:var(--ink);font-family:var(--pixel);-webkit-font-smoothing:none;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.55;cursor:default}
+h1,h2,h3,p,ol,table{margin:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* ---------- Stadium scene ---------- */
+.k-root{position:fixed;inset:0;overflow:hidden;background:linear-gradient(#03060f,#0a1430 55%,#14224a);-webkit-tap-highlight-color:transparent}
+.k-scene{position:absolute;inset:0;z-index:0;pointer-events:none}
+/* The home footer (2 buttons + countdown) is taller than the answer box, so lift the batter above it. */
+.k-root[data-phase=summary] .k-actor{display:none}
+.k-root[data-phase=home]{--feet:calc(220px + env(safe-area-inset-bottom));--ground:max(36dvh,350px)}
+.k-stars{position:absolute;inset:0 0 50% 0;opacity:.7;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 99%,#0000),radial-gradient(1.5px 1.5px at 78% 9%,#fff 99%,#0000),radial-gradient(2px 2px at 33% 31%,#4de3ff 99%,#0000),radial-gradient(1.5px 1.5px at 61% 26%,#fff 99%,#0000),radial-gradient(1.5px 1.5px at 88% 41%,#ffcc33 99%,#0000),radial-gradient(1.5px 1.5px at 6% 52%,#fff 99%,#0000),radial-gradient(2px 2px at 47% 12%,#fff 99%,#0000),radial-gradient(1.5px 1.5px at 94% 22%,#4de3ff 99%,#0000);animation:k-twinkle 4s steps(4) infinite}
+.k-tower{position:absolute;bottom:calc(var(--ground) + 7dvh);width:clamp(28px,5vw,48px);height:calc(64/14 * clamp(28px,5vw,48px))}
+.k-tower.l{left:3%}.k-tower.r{right:3%}
+.k-tower svg{position:relative;width:100%;height:100%;display:block}
+.k-glow{position:absolute;left:50%;top:6%;width:340%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff7d6aa,#fff7d61f 35%,#0000 70%);animation:k-flicker 5s steps(1) infinite}
+.k-stands{position:absolute;left:0;right:0;bottom:var(--ground);height:7dvh;background-color:#141d3a;background-image:radial-gradient(circle at 2px 2px,#ffcc33 1.5px,#0000 2px),radial-gradient(circle at 6px 5px,#ff5d8f 1.5px,#0000 2px),radial-gradient(circle at 4px 2px,#4de3ff 1.2px,#0000 1.8px);background-size:11px 8px,13px 8px,17px 8px;box-shadow:inset 0 4px #2b3a66,inset 0 -3px #0a1026}
+.k-ground{position:absolute;left:0;right:0;bottom:0;height:var(--ground);background:repeating-linear-gradient(90deg,var(--turf) 0 32px,var(--turf2) 32px 64px);box-shadow:inset 0 0 120px #0006}
+.k-rope{position:absolute;top:0;left:0;right:0;height:4px;background:repeating-linear-gradient(90deg,#f1f4ff 0 10px,#0000 10px 16px)}
+.k-pitch{position:absolute;left:0;width:55%;bottom:calc(var(--feet) - 10px);height:16px;background:var(--pitch);box-shadow:inset 0 3px #e0c48e,inset 0 -3px #a88752}
+.k-pitch:before{content:"";position:absolute;left:calc(var(--bat-x) - 22px);top:0;bottom:0;width:3px;background:#fff}
+
+.k-actor{position:absolute;left:var(--bat-x);bottom:var(--feet);width:var(--bat-w)}
+.k-batter{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 0 #0006)}
+/* Frames stack; base styles are the resting frame so reduced motion still shows a sensible pose. */
+.k-frames{position:relative;animation:k-breathe 1.6s steps(2) infinite}
+.k-frames .k-batter+.k-batter{position:absolute;inset:0}
+.k-frames.idle .f-waggle{opacity:0;animation:k-show 2.4s steps(1) infinite}
+.k-frames.idle .f-ready{animation:k-hide 2.4s steps(1) infinite}
+.k-frames.swing{animation:none}
+.k-frames.swing .f-back{opacity:0;animation:k-back .5s steps(1)}
+.k-frames.swing .f-swing{animation:k-follow .5s steps(1)}
+.k-actor.celebrate .k-frames{animation:k-jump .45s 1.3s 3 var(--ease-out)}
+.k-scene.cheer .k-stands{animation:k-crowd .22s 1.1s 12 steps(1)}
+.k-scene.cheer .k-glow{animation:k-flash .3s 1.1s 4 steps(1)}
+.k-stumps{position:absolute;bottom:0;left:-30%;width:28%;height:52%;display:flex;justify-content:space-between}
+.k-stumps i{display:block;width:22%;height:100%;background:#f1e7c8;box-shadow:inset -2px 0 #c9b88a;transform-origin:50% 100%}
+.k-stumps b{position:absolute;top:-4px;width:50%;height:4px;background:#f1e7c8}
+.k-stumps b:nth-of-type(1){left:0}.k-stumps b:nth-of-type(2){right:0}
+.k-stumps.down i:nth-child(1){transform:rotate(-24deg);animation:k-fall1 .4s var(--ease-snap)}
+.k-stumps.down i:nth-child(2){transform:rotate(-8deg);animation:k-fall2 .4s var(--ease-snap)}
+.k-stumps.down b:nth-of-type(1){transform:translate(-26px,-30px) rotate(-130deg);animation:k-bail1 .6s var(--ease-out)}
+.k-stumps.down b:nth-of-type(2){transform:translate(22px,-40px) rotate(160deg);animation:k-bail2 .6s var(--ease-out)}
+
+/* Shot: final position is the base style, so reduced motion shows where the ball landed. */
+.k-flight{position:absolute;left:calc(var(--bat-x) + var(--bat-w));right:clamp(36px,8vw,90px);bottom:calc(var(--feet) + var(--bat-mid));height:0}
+/* Ball leaves the bat once the backlift frame has played (.2s). */
+.k-fly-x{position:absolute;bottom:0;left:calc(var(--d) * 100%);animation:k-fly-x 1.1s linear .2s backwards}
+.k-fly-y{transform:translateY(var(--bat-mid));animation:k-fly-y 1.1s .2s backwards}
+.k-fly-y .k-ball-sprite{width:clamp(16px,2vw,22px)}
+.k-ball-sprite{display:block;width:16px;height:auto;filter:drop-shadow(0 0 6px #ff5d8f)}
+.k-land{position:absolute;bottom:calc(-1 * var(--bat-mid) + 22px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:18px;color:var(--gold);text-shadow:0 2px #000a;animation:k-fade 1.4s steps(1)}
+
+/* ---------- UI layer ---------- */
+.k-ui{position:relative;z-index:2;height:100dvh;display:grid;grid-template-rows:auto 1fr auto;max-width:760px;margin:0 auto;padding:max(8px,env(safe-area-inset-top)) 12px 0}
+.k-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px}
+.k-top-btns{display:flex;gap:8px}
+.k-icon{flex:none;width:44px;height:44px;padding:11px;border:0;background:var(--panel);color:var(--ink);font-size:24px;line-height:1;box-shadow:0 0 0 2px var(--night),0 0 0 4px var(--edge)}
+.k-icon:hover{color:var(--gold)}
+.k-icon svg{width:100%;height:100%;display:block}
+.k-top-btns .k-icon:first-child{padding:0;color:var(--gold)}
+
+.k-board{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;padding:4px 10px;background:#0a0f20;box-shadow:0 0 0 2px var(--night),0 0 0 5px #3a4560,inset 0 0 0 2px #151d36}
+.k-cell{display:flex;flex-direction:column;line-height:1}
+.k-cell span{font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.k-cell b{font-weight:400;font-size:28px;color:var(--gold);text-shadow:0 0 10px #ffcc3399;font-variant-numeric:tabular-nums}
+.k-cell:last-child{text-align:right}
+.k-cell.hot b{color:var(--miss);text-shadow:0 0 10px var(--miss);animation:k-blink .5s steps(2) infinite}
+.k-mid{align-items:center;gap:5px}
+.k-mid span{letter-spacing:.12em;white-space:nowrap}
+.k-lamps{display:flex;gap:4px}
+.k-lamps i{width:9px;height:9px;background:#1c2442;box-shadow:0 0 0 2px #05080f}
+.k-lamps i.hit{background:var(--gold);box-shadow:0 0 0 2px #05080f,0 0 6px var(--gold)}
+.k-lamps i.out{background:var(--miss)}
+.k-lamps i.cur{background:var(--ink);animation:k-blink 1s steps(2) infinite}
+
+.k-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 4px 10px}
+.k-panel{background:#0f1b38ee;box-shadow:0 0 0 3px var(--night),0 0 0 6px var(--edge),0 10px 30px #0008}
+.k-note{color:var(--muted);letter-spacing:.1em;font-size:16px;text-align:center}
+.k-kicker{color:var(--gold);letter-spacing:.24em;font-size:16px}
+
+.k-logo{text-align:center;padding-top:4dvh;animation:k-in .8s var(--ease-out) backwards}
+.k-logo-ipl{display:inline-block;color:var(--night);background:var(--gold);font-size:clamp(26px,6vw,36px);letter-spacing:.3em;padding:2px 6px 0 14px;box-shadow:0 4px 0 #b8860b}
+.k-logo h1{font-weight:400;font-size:clamp(56px,16vw,124px);line-height:.95;letter-spacing:.04em;margin-top:10px;text-shadow:4px 4px 0 #d7263d,-2px -2px 0 #4de3ff66,0 0 30px #fff5}
+.k-tag{color:var(--cyan);letter-spacing:.16em;font-size:clamp(16px,4vw,22px);margin-top:12px;text-shadow:0 0 12px #4de3ff80}
+
+.k-question{padding:14px 16px 12px;animation:k-in .5s var(--ease-snap) backwards}
+.k-question h1{font-weight:400;font-size:clamp(28px,6.6vw,40px);line-height:1.05;margin:6px 0 8px}
+.k-hint{color:var(--muted);letter-spacing:.1em;font-size:14px}
+
+.k-result{text-align:center;padding-top:2dvh;animation:k-in .6s var(--ease-snap) backwards}
+.k-result-name{color:var(--tc);font-size:clamp(40px,11vw,64px);line-height:1;letter-spacing:.06em;text-shadow:0 0 22px var(--tc),3px 3px 0 #000a}
+.k-result-ans{font-size:26px;margin-top:6px}
+.k-result-pts{font-size:34px;margin-top:2px}
+.k-result-pts b{font-weight:400;color:var(--tc)}
+
+.k-summary{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:stretch;animation:k-in .6s var(--ease-out) backwards}
+.k-total{font-weight:400;font-size:clamp(64px,18vw,104px);line-height:1;color:var(--gold);text-shadow:0 0 24px #ffcc3380,4px 4px 0 #d7263d}
+.k-total small{font-size:.38em;color:var(--muted);text-shadow:none}
+.k-scorecard{width:100%;border-collapse:collapse;text-align:left;font-size:20px;margin:6px 0}
+.k-scorecard th{font-weight:400;color:var(--gold);letter-spacing:.14em;font-size:15px;padding:8px 10px 4px}
+.k-scorecard td{padding:8px 10px 6px;border-top:1px solid #2b3a6680;vertical-align:top}
+.k-scorecard tbody td:first-child{color:var(--muted);width:2em;border-left:4px solid var(--tc)}
+.k-scorecard td:last-child,.k-scorecard th:last-child{text-align:right;color:var(--tc,var(--gold));font-variant-numeric:tabular-nums}
+.k-scorecard small{display:block;color:var(--muted);font-size:14px;letter-spacing:.04em}
+.k-scorecard em{font-style:normal;color:var(--miss)}
+.k-scorecard tfoot th,.k-scorecard tfoot td{border-top:2px solid var(--edge);font-size:22px}
+.k-curve{padding:12px 14px}
+.k-curve-top{color:var(--gold);font-size:36px}
+.k-curve svg{display:block;width:100%;height:80px;margin-top:10px}
+
+/* ---------- Dock (buttons and answer box) ---------- */
+.k-dock{padding:10px 4px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.k-actions{display:flex;flex-direction:column;gap:12px;align-items:stretch;max-width:520px;width:100%;margin:0 auto}
+.k-row{display:flex;gap:12px}.k-row>*{flex:1}
+.k-btn{border:0;min-height:48px;letter-spacing:.12em;font-size:22px;padding:10px 18px 8px;transition:transform .12s}
+.k-btn:active:not(:disabled){transform:translateY(3px)}
+.k-btn-big{color:var(--night);background:var(--gold);font-size:clamp(24px,6vw,30px);box-shadow:0 0 0 3px var(--night),0 6px 0 3px #b8860b,0 0 30px #ffcc3355}
+.k-btn-big:hover{background:#ffd95c}
+.k-btn-quiet{color:var(--ink);background:var(--panel);box-shadow:0 0 0 2px var(--night),0 0 0 4px var(--edge)}
+.k-btn-quiet:hover{color:var(--gold)}
+.k-btn-hit{flex:none;color:var(--ink);background:#d7263d;box-shadow:0 0 0 2px var(--night),0 4px 0 2px #7d1424}
+.k-answer{display:flex;gap:10px;align-items:center;max-width:620px;width:100%;margin:0 auto}
+.k-input-wrap{position:relative;flex:1;min-width:0}
+/* "Did you mean" ghost text sits exactly over the input text, dimmed. */
+.k-ghost{position:absolute;inset:0;display:flex;align-items:center;border:3px solid #0000;padding:8px 10px 6px;font-size:24px;line-height:1.2;white-space:pre;overflow:hidden;pointer-events:none;color:var(--ink);opacity:.4}
+.k-ghost-typed{visibility:hidden}
+.k-ghost-fix{pointer-events:auto;cursor:pointer;color:var(--gold);text-overflow:ellipsis;overflow:hidden}
+.k-input{line-height:1.2;width:100%;min-height:48px;border:3px solid var(--edge);border-radius:0;outline:none;background:#0a0f20;color:var(--ink);caret-color:var(--gold);font-size:24px;padding:8px 10px 6px}
+.k-input:focus{border-color:var(--gold)}
+.k-input::placeholder{color:var(--muted);opacity:.6}
+.k-answer.hot .k-input,.k-input[aria-invalid=true]{border-color:var(--miss)}
+.k-fuse{position:absolute;left:0;right:0;bottom:-7px;height:4px;background:#0a0f20}
+.k-fuse div{height:100%;background:var(--gold);transform-origin:0;transition:transform .25s linear}
+.k-answer.hot .k-fuse div{background:var(--miss)}
+.k-reject{text-align:center;color:#ff9f43;letter-spacing:.06em;font-size:18px;text-shadow:0 2px #000a}
+.k-shake{animation:k-shake .28s var(--ease-out)}
+
+/* ---------- How to play ---------- */
+.k-howto{width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0;border:0;color:var(--ink);background:var(--panel);box-shadow:0 0 0 3px var(--night),0 0 0 7px var(--gold),0 20px 60px #000c;overflow:auto}
+.k-howto::backdrop{background:#02040acc}
+.k-howto-in{position:relative;padding:20px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.k-howto h2{font-weight:400;font-size:36px;color:var(--gold);letter-spacing:.12em;text-align:center}
+.k-x{position:absolute;top:8px;right:8px;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:24px}
+.k-x:hover{color:var(--ink)}
+.k-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.k-steps li{display:flex;gap:12px;align-items:flex-start}
+.k-step-n{flex:none;width:34px;height:34px;display:grid;place-items:center;background:var(--gold);color:var(--night);font-size:24px}
+.k-steps h3{font-weight:400;font-size:22px;letter-spacing:.08em;color:var(--cyan)}
+.k-steps p{font-size:19px;line-height:1.15;color:var(--ink)}
+.k-steps b{font-weight:400;color:var(--gold)}
+.k-mini-card{margin-top:4px;padding:6px 10px;background:#0a0f20;box-shadow:0 0 0 2px var(--edge)}
+.k-mini-input{display:flex;align-items:center;margin-top:6px;padding:4px 8px;background:#0a0f20;box-shadow:0 0 0 2px var(--gold)}
+.k-mini-input i{font-style:normal;color:var(--gold);animation:k-blink 1s steps(2) infinite}
+.k-mini-input span{margin-left:auto;color:var(--gold)}
+.k-example{display:flex;gap:10px;align-items:center;margin-top:6px}
+.k-example .k-batter{width:44px;flex:none}
+.k-arc{display:flex;align-items:center;gap:6px;color:var(--gold)}
+.k-arc .k-ball-sprite{width:12px;flex:none}
+.k-arc.short .k-ball-sprite{margin-right:10px}
+.k-arc.long .k-ball-sprite{margin-right:90px}
+.k-howto-foot{color:var(--muted);font-size:17px;text-align:center;letter-spacing:.04em}
+
+/* ---------- Motion ---------- */
+@keyframes k-in{from{opacity:0;transform:translateY(-12px) scale(.97)}}
+@keyframes k-fly-x{from{left:0}}
+@keyframes k-fly-y{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.3,.8,.6,1)}50%{transform:translateY(calc(-1 * (var(--d) * 26dvh + 24px)));animation-timing-function:cubic-bezier(.4,0,.7,.2)}100%{transform:translateY(var(--bat-mid))}}
+@keyframes k-fade{0%{opacity:0}}
+@keyframes k-fall1{from{transform:none}}
+@keyframes k-fall2{from{transform:none}}
+@keyframes k-bail1{from{transform:none}}
+@keyframes k-bail2{from{transform:none}}
+@keyframes k-blink{50%{opacity:.35}}
+@keyframes k-breathe{50%{transform:translateY(-2px)}}
+@keyframes k-show{0%{opacity:0}70%{opacity:1}85%{opacity:0}}
+@keyframes k-hide{0%{opacity:1}70%{opacity:0}85%{opacity:1}}
+@keyframes k-back{0%{opacity:1}40%{opacity:0}}
+@keyframes k-follow{0%{opacity:0}40%{opacity:1}}
+@keyframes k-jump{50%{transform:translateY(-18px)}}
+@keyframes k-crowd{50%{background-position:0 -3px,0 -2px,0 -3px}}
+@keyframes k-flash{50%{opacity:.4}}
+@keyframes k-twinkle{50%{filter:brightness(1.4)}}
+@keyframes k-flicker{0%,100%{opacity:1}92%{opacity:.75}}
+@keyframes k-shake{25%{transform:translateX(6px)}50%{transform:translateX(-6px)}75%{transform:translateX(4px)}}
+
+/* ---------- Sizes ---------- */
+@media (min-width:760px){:root{--ground:34dvh}.k-ui{padding-top:16px}.k-body{padding-top:22px}}
+/* Short screens (landscape phones, open keyboard): drop the batter so the answer box stays visible. */
+@media (max-height:520px){.k-actor,.k-flight,.k-tower{display:none}.k-logo{padding-top:0}.k-logo h1{font-size:56px}.k-result-name{font-size:36px}}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ /* Pose swaps don't move anything across the screen, so keep them: the batter still waggles and swings. */
+ .k-frames.idle .f-waggle{animation:k-show 2.4s steps(1) infinite!important}
+ .k-frames.idle .f-ready{animation:k-hide 2.4s steps(1) infinite!important}
+ .k-frames.swing .f-back{animation:k-back .5s steps(1)!important}
+ .k-frames.swing .f-swing{animation:k-follow .5s steps(1)!important}
+}
